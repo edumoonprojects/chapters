@@ -35,3 +35,11 @@ Built by Vikas Kapuganti for EduMoon
 - Event photos live in the `moments` folder.
 - To add an event to "Recent highlights", add a block to `EVENTS` in `assets/data.js`.
 - To add a photo to the "Moments" gallery, add a line to `MOMENTS` in `assets/data.js`.
+
+## IDs, clubs and members (v3)
+- IDs include the academic year: EM-26-VZG-AUCE-001 (Student Lead), EM-26-VZG-AUCE-CD-001 (club member). 26 = 2026-27.
+- Club codes: CD Coding, EN English, CS Career & Skills, SM Social Media, PC Project Club.
+- Add club members to `MEMBERS` in `assets/data.js` so their IDs can be verified.
+- In June 2027, change `year: 26` to `year: 27` in `SITE`. Older IDs then show as "Was an EduMoon member in 2026-27".
+- Upcoming events, hall of fame, newspapers, partners and the FAQ are all lists in `assets/data.js`.
+- Partner and newspaper logos are in the `brands` folder.

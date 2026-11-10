@@ -1,7 +1,8 @@
 // EduMoon Chapters: shared header, footer and page rendering. Data comes from data.js.
 (function () {
   const S = window.SITE, C = window.CHAPTERS, L = window.LEADS;
-  const EV = window.EVENTS || [], MO = window.MOMENTS || [];
+  const EV = window.EVENTS || [], MO = window.MOMENTS || [], ME = window.MEMBERS || [], CL = window.CLUBS || [];
+  const UP = window.UPCOMING || [], FA = window.FAME || [], PR = window.PRESS || [], MC = window.MORE_COLLEGES || [], PA = window.PARTNERS || [], FQ = window.FAQ || [];
   const page = document.body.dataset.page;
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -32,6 +33,9 @@
     trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
     menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
     play: '<polygon points="6 3 20 12 6 21 6 3" fill="currentColor"/>',
+    wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    phone: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
     sparkle: '<path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor"/>'
   };
   const ic = n => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n] || ""}</svg>`;
@@ -47,7 +51,7 @@
 
   // ---------- Header and footer ----------
   const navItems = [
-    ["index.html", "Home", "home"], ["chapters.html", "Chapters", "chapters"], ["index.html#highlights", "Events", "events"],
+    ["index.html", "Home", "home"], ["chapters.html", "Chapters", "chapters"], ["clubs.html", "Clubs", "clubs"], ["index.html#highlights", "Events", "events"],
     [S.gamesUrl, "Games", "games"], ["verify.html", "Verify ID", "verify"], ["lead.html", "Become a Lead", "lead"]
   ];
   $("#top").innerHTML = `<div class="wrap">
@@ -124,26 +128,33 @@
     <div class="actions"><a class="btn yellow" href="${S.applyUrl}" target="_blank" rel="noopener">Apply now ${ic("arrow")}</a><a class="btn ghost" href="lead.html">See benefits</a></div>
   </div>`;
   const verifyBox = (prefill = "") => `<div class="verify">
-    <form id="verifyForm" autocomplete="off"><input id="verifyInput" placeholder="e.g. EM-VZG-AUCE-001" aria-label="EduMoon ID" value="${esc(prefill)}" maxlength="24"><button class="btn" type="submit">Verify</button></form>
+    <form id="verifyForm" autocomplete="off"><input id="verifyInput" placeholder="e.g. EM-26-VZG-AUCE-001" aria-label="EduMoon ID" value="${esc(prefill)}" maxlength="30"><button class="btn" type="submit">Verify</button></form>
     <div id="verifyResult" aria-live="polite"></div>
   </div>`;
+  const CLUBNAME = Object.fromEntries(CL.map(c => [c.code, c.name]));
+  const yearLabel = y => `20${y}-${String(y + 1).padStart(2, "0")}`;
   function wireVerify() {
     const form = $("#verifyForm"); if (!form) return;
     const run = () => {
       const q = $("#verifyInput").value.trim().toUpperCase().replace(/\s+/g, "");
       const out = $("#verifyResult");
       if (!q) { out.innerHTML = ""; return; }
-      const l = L.find(x => x.id === q);
-      if (!l) {
-        out.innerHTML = `<div class="result no">${ic("x")}<div><b>No Student Lead found with ID ${esc(q)}</b><p class="muted">Check the ID and try again. IDs look like EM-VZG-AUCE-001.</p></div></div>`;
+      const m = q.match(/^EM-(\d{2})-([A-Z]+)-([A-Z]+)(?:-([A-Z]{2}))?-(\d{3})$/);
+      const lead = L.find(x => x.id === q), member = ME.find(x => x.id === q);
+      if (!m || (!lead && !member)) {
+        out.innerHTML = `<div class="result no">${ic("x")}<div><b>No EduMoon ID found: ${esc(q)}</b><p class="muted">Check the ID and try again. Student Lead IDs look like EM-26-VZG-AUCE-001. Club member IDs look like EM-26-VZG-AUCE-CD-001.</p></div></div>`;
         return;
       }
-      const c = chapterOf(l.chapter);
-      out.innerHTML = `<div class="result ok">${avatar(l, 76)}<div>
-        <span class="tick">${ic("badge")} Verified EduMoon ${esc(l.role)}</span>
-        <h3 style="font-size:24px;margin-top:4px">${esc(l.name)}</h3>
-        <p class="muted">${esc(c.name)}${courseLine(l) ? " · " + esc(courseLine(l)) : ""}</p>
-        <p class="muted" style="font-size:14px">ID ${esc(l.id)} · <a href="chapter.html?c=${c.id}">View chapter</a></p></div></div>`;
+      const yr = +m[1], current = yr === S.year;
+      const c = lead ? chapterOf(lead.chapter) : C.find(x => x.cityCode === m[2] && x.short === m[3]);
+      const role = lead ? lead.role : `Member · ${CLUBNAME[m[4]] || "Club"}${m[4] ? " Club" : ""}`.replace("Club Club", "Club");
+      const person = lead || { name: member.name, photo: "" };
+      const status = current ? `${ic("badge")} Verified EduMoon ${esc(role)} · ${yearLabel(yr)}` : `${ic("badge")} Was an EduMoon ${esc(role)} in ${yearLabel(yr)}`;
+      out.innerHTML = `<div class="result ok${current ? "" : " past"}">${avatar(person, 76)}<div>
+        <span class="tick">${status}</span>
+        <h3 style="font-size:24px;margin-top:4px">${esc(person.name)}</h3>
+        <p class="muted">${c ? esc(c.name) : ""}${lead && courseLine(lead) ? " · " + esc(courseLine(lead)) : ""}</p>
+        <p class="muted" style="font-size:14px">ID ${esc(q)}${c ? ` · <a href="chapter.html?c=${c.id}">View chapter</a>` : ""}</p></div></div>`;
     };
     form.addEventListener("submit", e => {
       e.preventDefault(); run();
@@ -152,6 +163,8 @@
     });
     if ($("#verifyInput").value) run();
   }
+  const brand = (f, n) => `<span class="blogo"><img src="brands/${f}" alt="${n}" loading="lazy"></span>`;
+  const clubTiles = () => `<div class="clubs">${CL.map(c => `<a class="club" href="clubs.html#${c.code.toLowerCase()}">${ic(c.icon)}<h3>${esc(c.name)}</h3><p>${esc(c.focus)}</p><span class="seats">${c.seats} seats per chapter</span></a>`).join("")}</div>`;
   const pageHead = (sticker, title, lead, cls = "") => `<section class="phead"><div class="wrap" style="position:relative">
       <div class="shape s1"></div>
       <span class="sticker ${cls}">${sticker}</span>
@@ -196,15 +209,32 @@
           <div class="stat"><b>${S.games}</b><span>Learning games</span></div>
         </div>
         <div class="trust">
-          <div class="trust-card"><h3>Featured in</h3><div class="names"><span>Times of India</span><span>The Hindu</span><span>Eenadu</span><span>Sakshi</span></div></div>
-          <div class="trust-card"><h3>Incubated at</h3><div class="names"><span>RTIH Visakhapatnam</span><span>a-hub</span></div></div>
-          <div class="trust-card"><h3>Recognised and backed</h3><div class="names"><span>Top 90 Startups, TiE 2022</span><span>STPI</span><span>Pontaq Ventures</span></div></div>
+          <div class="trust-card"><h3>Incubated at</h3><div class="brands">${brand("rtih.png", "RTIH, Ratan Tata Innovation Hub")}${brand("ahub.png", "a-hub")}</div></div>
+          <div class="trust-card"><h3>Backed by</h3><div class="brands">${brand("stpi.png", "STPI")}${brand("pontaq.png", "Pontaq Ventures")}</div></div>
+          <div class="trust-card"><h3>Recognised by</h3><div class="brands">${brand("startup-india.png", "Startup India")}${brand("msme.png", "MSME")}${brand("iso.png", "ISO 9001:2015")}</div><p class="tie">${ic("trophy")} Top 90 Startups globally, TiE 2022</p></div>
         </div>
       </div></section>
 
-      <section class="tint"><div class="wrap">
+      <section class="tint" id="news"><div class="wrap">
+        <div class="sec-head"><span class="sticker">In the news</span><h2>EduMoon in the papers</h2><p>Tap a story to read the full article.</p></div>
+        <div class="press">${PR.map(p => `<a class="press-card" href="${esc(p.url)}" target="_blank" rel="noopener">
+          <span class="plogo"><img src="brands/${esc(p.logo)}" alt="${esc(p.paper)}" loading="lazy"></span>
+          <span class="pyear">${esc(p.paper)} · ${esc(p.year)}</span>
+          <h3>${esc(p.title)}</h3>
+          <span class="read">Read the article ${ic("arrow")}</span></a>`).join("")}</div>
+      </div></section>
+
+      <section><div class="wrap">
         <div class="sec-head"><span class="sticker">Where we are</span><h2>Our Student Leads come from these colleges</h2></div>
         ${logoStrip()}
+        <h3 class="sub-head">And students from many more colleges</h3>
+        <div class="logos small">${MC.map(c => `<div class="logo-tile"><img src="logos/${esc(c.logo)}" alt="${esc(c.name)} logo" loading="lazy"><span>${esc(c.name)}</span></div>`).join("")}</div>
+      </div></section>
+
+      <section class="tint"><div class="wrap">
+        <div class="sec-head"><span class="sticker y">What’s next</span><h2>Happening next</h2><p>Free for every student. Join the community to get the link.</p></div>
+        <div class="upcoming">${UP.map(u => `<div class="up"><span class="when">${ic("calendar")} ${esc(u.when)}</span><h3>${esc(u.title)}</h3><p class="where">${esc(u.where)}</p><p>${esc(u.text)}</p></div>`).join("")}</div>
+        <div class="btns"><a class="btn" href="${S.communityUrl}" target="_blank" rel="noopener">Join the community ${ic("arrow")}</a></div>
       </div></section>
 
       <section id="highlights"><div class="wrap">
@@ -220,22 +250,25 @@
         <div class="moments">${MO.map((m, i) => `<button class="moment" type="button" data-i="${i}"><img src="moments/${esc(m.photo)}" alt="${esc(m.caption)}" loading="lazy"><span>${esc(m.caption)}</span></button>`).join("")}</div>
       </div></section>
 
-      <section id="chapters"><div class="wrap">
+      <section><div class="wrap">
+        <div class="sec-head"><span class="sticker">Our clubs</span><h2>Find your people</h2><p>Five clubs, each with one clear focus. Join free in the global community, or get a seat in your college chapter.</p></div>
+        ${clubTiles()}
+        <div class="btns"><a class="btn" href="clubs.html">See all clubs ${ic("arrow")}</a></div>
+      </div></section>
+
+      <section id="chapters" class="tint"><div class="wrap">
         <div class="sec-head"><span class="sticker o">Chapters</span><h2>Meet the chapters</h2><p>Every chapter is led by students, for students. Tap a college to meet its Student Leads.</p></div>
         ${chaptersByCity()}
       </div></section>
 
-      <section class="tint"><div class="wrap">
-        <div class="sec-head"><span class="sticker">Our clubs</span><h2>Find your people</h2><p>Every chapter runs four clubs. Join the one that matches what you love.</p></div>
-        <div class="clubs">
-          <div class="club">${ic("code")}<h3>Coding</h3><p>Build your first website, solve DSA problems and ship real projects.</p></div>
-          <div class="club">${ic("chat")}<h3>English</h3><p>Speak up with confidence through games, stories and conversations.</p></div>
-          <div class="club">${ic("briefcase")}<h3>Career &amp; Skills</h3><p>Careers, interviews, entrepreneurship and starting your own thing.</p></div>
-          <div class="club">${ic("camera")}<h3>Social Media</h3><p>Cover every event, make reels and learn content creation.</p></div>
-        </div>
+      <section><div class="wrap">
+        <div class="sec-head"><span class="sticker o">Hall of fame</span><h2>Students who made it count</h2></div>
+        <div class="fame">${FA.map(f => `<article class="fame-card"><img src="moments/${esc(f.photo)}" alt="${esc(f.title)}" loading="lazy"><div class="fbody">
+          <span class="sticker y">${ic("trophy")} Winners</span><h3>${esc(f.title)}</h3><p class="muted">${esc(f.text)}</p>
+          ${f.people.length ? `<ul>${f.people.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}</div></article>`).join("")}</div>
       </div></section>
 
-      <section><div class="wrap video">
+      <section class="tint"><div class="wrap video">
         ${video}
         <div>
           <span class="sticker y">Learn while you play</span>
@@ -249,28 +282,39 @@
         </div>
       </div></section>
 
-      <section class="tint"><div class="wrap">
+      <section><div class="wrap">
         <div class="sec-head"><span class="sticker p">Why become a Student Lead</span><h2>More than a title</h2></div>
         ${benefitsGrid(BENEFITS.slice(0, 6))}
         <div style="margin-top:40px">${applyBand()}</div>
+        <div class="duo">
+          <div class="duo-card bring"><span class="sticker">Don’t see your college?</span><h2>Bring EduMoon to your college</h2><p>Start a chapter, lead your campus and bring your whole college into the community.</p><a class="btn pink" href="${S.applyUrl}" target="_blank" rel="noopener">Start a chapter ${ic("arrow")}</a></div>
+          <div class="duo-card app"><span class="sticker y">Get the EduMoon app</span><h2>Free previous papers and study materials</h2><p>On Android and iOS. Everything for your exams in one place.</p><a class="btn yellow" href="${S.appUrl}" target="_blank" rel="noopener">Get the app ${ic("phone")}</a></div>
+        </div>
       </div></section>
 
-      <section><div class="wrap about">
+      <section class="tint"><div class="wrap about">
         <div class="story">
           <span class="sticker t">Our story</span>
           <h2 style="font-size:clamp(34px,5vw,56px);margin-top:16px">It started with juniors asking for notes</h2>
           <p>In 2020, during COVID, juniors kept asking for study materials. So we started an Instagram page to share them for free. That page became <b>EduMoon</b>.</p>
           <p>Today EduMoon is a community of <b>${S.students} students</b> across <b>${S.colleges} colleges</b>, with clubs, games, events, challenges and Student Leads running chapters on their own campuses.</p>
+          <h3 class="sub-head" style="margin-top:28px">Community partners we’ve worked with</h3>
+          <div class="partners">${PA.map(p => `<span>${esc(p)}</span>`).join("")}</div>
         </div>
         <ol class="timeline">
           <li><span class="yr">2020</span><div><h3>A free digital library</h3><p>Study materials and previous papers for students, shared on Instagram.</p></div></li>
-          <li><span class="yr">2022</span><div><h3>Recognised as a startup</h3><p>Selected in the Top 90 Startups globally at TiE 2022, incubated at RTIH and a-hub.</p></div></li>
-          <li><span class="yr">2026</span><div><h3>EduMoon Chapters</h3><p>Student-led chapters, clubs and ${S.games} learning games across colleges.</p></div></li>
+          <li><span class="yr">2022</span><div><h3>Recognised as a startup</h3><p>Selected in the Top 90 Startups globally at TiE 2022 and incubated at a-hub.</p></div></li>
+          <li><span class="yr">2026</span><div><h3>EduMoon Chapters</h3><p>Based at RTIH Visakhapatnam, with student-led chapters, clubs and ${S.games} learning games across colleges.</p></div></li>
         </ol>
       </div></section>
 
+      <section><div class="wrap">
+        <div class="sec-head"><span class="sticker p">FAQ</span><h2>Questions students ask</h2></div>
+        <div class="faq">${FQ.map(([q, a]) => `<details><summary>${esc(q)}<span class="pm" aria-hidden="true"></span></summary><p>${esc(a)}</p></details>`).join("")}</div>
+      </div></section>
+
       <section class="tint"><div class="wrap">
-        <div class="sec-head"><span class="sticker">Verify</span><h2>Verify an EduMoon ID</h2><p>Every Student Lead has a unique EduMoon ID. Type one to check it.</p></div>
+        <div class="sec-head"><span class="sticker">Verify</span><h2>Verify an EduMoon ID</h2><p>Every Student Lead and club member has a unique EduMoon ID. Type one to check it.</p></div>
         ${verifyBox()}
       </div></section>
       <dialog class="lightbox" id="lb"><button class="close" type="button" aria-label="Close">${ic("x")}</button><img id="lbImg" alt=""><p id="lbCap"></p></dialog>`;
@@ -344,9 +388,39 @@
       </div></section>`;
   }
 
+  if (page === "clubs") {
+    const idParts = [["EM", "EduMoon"], ["26", "Year 2026-27"], ["VZG", "City"], ["AUCE", "College"], ["CD", "Club"], ["001", "Your number"]];
+    main.innerHTML = pageHead("Clubs", `Find your club. <span class="mark">Find your people.</span>`, "Every club has one clear focus. Start free in the global community, or get a seat in your college chapter.", "p") +
+      `<section style="padding-top:20px"><div class="wrap">
+        <div class="ways">
+          <div class="way"><span class="sticker t">Free · Open to everyone</span><h2>EduMoon Global Community</h2>
+            <ul><li>Coding, English and Career &amp; Skills clubs</li><li>Weekly live sessions and games, online</li><li>No limit and no interview</li></ul>
+            <a class="btn" href="${S.communityUrl}" target="_blank" rel="noopener">Join the community ${ic("arrow")}</a></div>
+          <div class="way hot"><span class="sticker y">Recruitment opening soon</span><h2>Clubs in your college chapter</h2>
+            <ul><li>${CL.reduce((a, c) => a + c.seats, 0)} seats per college, selected by interview</li><li>Your own EduMoon member number</li><li>Members-only campus events</li><li>First access to opportunities</li></ul>
+            <p class="stay">Stay tuned. Join the community to hear first.</p></div>
+        </div>
+      </div></section>
+      <section class="tint"><div class="wrap">
+        <div class="sec-head"><span class="sticker">The clubs</span><h2>What each club focuses on</h2></div>
+        <div class="club-list">${CL.map(c => `<article class="club-card" id="${c.code.toLowerCase()}">
+          <div class="chead"><span class="cic">${ic(c.icon)}</span><div><h3>${esc(c.name)}</h3><p class="focus">${esc(c.focus)}</p></div><span class="seat"><b>${c.seats}</b>seats per chapter</span></div>
+          <p class="who">${ic("users")} ${esc(c.who)}</p>
+          <ul>${c.does.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
+          <div class="cfoot"><span class="sticker y">Chapter recruitment opening soon</span>${c.open ? `<a class="btn ghost" href="${S.communityUrl}" target="_blank" rel="noopener">Join free in the community</a>` : `<span class="only">Only in college chapters</span>`}</div>
+        </article>`).join("")}</div>
+      </div></section>
+      <section><div class="wrap">
+        <div class="sec-head"><span class="sticker t">Your EduMoon number</span><h2>Every member gets an EduMoon number</h2><p>A unique ID that anyone can verify on this site. It shows your club, your college and the year you were a member.</p></div>
+        <div class="idbreak">${idParts.map(([p, l]) => `<div><b>${p}</b><span>${l}</span></div>`).join("")}</div>
+        <p class="muted" style="margin-top:16px">Numbers start again from 001 every academic year. <a href="verify.html">Verify an ID</a></p>
+        <div style="margin-top:44px">${applyBand()}</div>
+      </div></section>`;
+  }
+
   if (page === "verify") {
     const pre = new URLSearchParams(location.search).get("id") || "";
-    main.innerHTML = pageHead("Verify", `Verify an <span class="mark">EduMoon ID</span>`, "Every EduMoon Student Lead has a unique ID. Type it below to confirm it’s real.", "t") +
+    main.innerHTML = pageHead("Verify", `Verify an <span class="mark">EduMoon ID</span>`, "Every EduMoon Student Lead and club member has a unique ID. Type it below to confirm it’s real.", "t") +
       `<section style="padding-top:10px"><div class="wrap">${verifyBox(pre)}</div></section>`;
     wireVerify();
   }

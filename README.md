@@ -41,6 +41,7 @@ Built by Vikas Kapuganti for EduMoon
 - Club codes: CD Coding, EN English, CS Career & Skills, SM Social Media, PC Project Club.
 - Add club members to `MEMBERS` in `assets/data.js` so their IDs can be verified.
 - In June 2027, change `year: 26` to `year: 27` in `SITE`. Older IDs then show as "Was an EduMoon member in 2026-27".
+- Profiles: every Student Lead has a page at profile.html?id=THEIR-ID, built from the same data.
 - Leaderboard: add a line to `ACTIVITY` in `assets/data.js` for every event or weekly WhatsApp activity. Points add up automatically. Change `LEADERBOARD.month` and `updated` when you update it.
 - Upcoming events, hall of fame, newspapers, partners and the FAQ are all lists in `assets/data.js`.
 - Partner and newspaper logos are in the `brands` folder.

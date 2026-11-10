@@ -155,7 +155,7 @@
         <span class="tick">${status}</span>
         <h3 style="font-size:24px;margin-top:4px">${esc(person.name)}</h3>
         <p class="muted">${c ? esc(c.name) : ""}${lead && courseLine(lead) ? " · " + esc(courseLine(lead)) : ""}</p>
-        <p class="muted" style="font-size:14px">ID ${esc(q)}${c ? ` · <a href="chapter.html?c=${c.id}">View chapter</a>` : ""}</p></div></div>`;
+        <p class="muted" style="font-size:14px">ID ${esc(q)}${lead ? ` · <a href="${prof(lead.id)}">View profile</a>` : ""}${c ? ` · <a href="chapter.html?c=${c.id}">View chapter</a>` : ""}</p></div></div>`;
     };
     form.addEventListener("submit", e => {
       e.preventDefault(); run();
@@ -180,25 +180,29 @@
   const medal = r => r <= 3 ? ` m${r}` : "";
   function boardHTML(all) {
     const st = standings(all), lr = rankList(st.on, "pts"), cr = rankList(st.con, "pts");
-    const podium = (items, ranks, face, label, sub) => {
+    const podium = (items, ranks, face, label, sub, href) => {
       if (!items.length) return "";
       const order = [1, 0, 2].filter(i => i < items.length);
       return `<div class="podium">${order.map(i => `<div class="pod p${Math.min(ranks[i], 4)}">
-        <div class="pface">${face(items[i])}</div><b class="pname">${label(items[i])}</b><span class="psub">${sub(items[i])}</span>
+        ${href ? `<a class="plink" href="${href(items[i])}">` : ""}<div class="pface">${face(items[i])}</div><b class="pname">${label(items[i])}</b>${href ? "</a>" : ""}<span class="psub">${sub(items[i])}</span>
         <div class="block"><span class="pnum">${ranks[i]}</span><span class="ppts">${items[i].pts} pts</span></div></div>`).join("")}</div>`;
     };
     const short = n => esc(n);
-    const leadPod = podium(st.on, lr, x => avatar(x.l, 68), x => short(x.l.name), x => esc((chapterOf(x.l.chapter) || {}).short || ""));
-    const chapPod = podium(st.con, cr, x => `<img class="clogo big" src="logos/${esc(x.c.logo)}" alt="">`, x => esc(x.c.short), x => esc(x.c.city));
-    const leadRows = st.on.length > 3 ? st.on.map((x, i) => { if (i < 3) return ""; const c = chapterOf(x.l.chapter); return `<li class="row${medal(lr[i])}"><span class="rk">${lr[i]}</span>${avatar(x.l, 44)}<span class="who"><b>${esc(x.l.name)}</b><small>${esc(c ? c.short : "")} · ${x.events ? `${x.events} ${x.events === 1 ? "event" : "events"}` : "WhatsApp active"}</small></span><span class="pt">${x.pts}<small>pts</small></span></li>`; }).join("") : st.on.length ? "" : `<li class="empty">No points yet this month.</li>`;
-    const chapRows = st.con.length > 3 ? st.con.map((x, i) => i < 3 ? "" : `<li class="row${medal(cr[i])}"><span class="rk">${cr[i]}</span><img class="clogo" src="logos/${esc(x.c.logo)}" alt=""><span class="who"><b>${esc(x.c.name)}</b><small>${x.n} ${x.n === 1 ? "Student Lead" : "Student Leads"} scoring${cr[i] === 1 ? ` · <em>Leading chapter</em>` : ""}</small></span><span class="pt">${x.pts}<small>pts</small></span></li>`).join("") : st.con.length ? "" : `<li class="empty">No points yet this month.</li>`;
+    const leadPod = podium(st.on, lr, x => avatar(x.l, 68), x => short(x.l.name), x => esc((chapterOf(x.l.chapter) || {}).short || ""), x => prof(x.l.id));
+    const chapPod = podium(st.con, cr, x => `<img class="clogo big" src="logos/${esc(x.c.logo)}" alt="">`, x => esc(x.c.short), x => esc(x.c.city), x => `chapter.html?c=${x.c.id}`);
+    const leadRows = st.on.length > 3 ? st.on.map((x, i) => { if (i < 3) return ""; const c = chapterOf(x.l.chapter); return `<li class="row${medal(lr[i])}"><a class="rowlink" href="${prof(x.l.id)}"><span class="rk">${lr[i]}</span>${avatar(x.l, 44)}<span class="who"><b>${esc(x.l.name)}</b><small>${esc(c ? c.short : "")} · ${x.events ? `${x.events} ${x.events === 1 ? "event" : "events"}` : "WhatsApp active"}</small></span><span class="pt">${x.pts}<small>pts</small></span></a></li>`; }).join("") : st.on.length ? "" : `<li class="empty">No points yet this month.</li>`;
+    const chapRows = st.con.length > 3 ? st.con.map((x, i) => i < 3 ? "" : `<li class="row${medal(cr[i])}"><a class="rowlink" href="chapter.html?c=${x.c.id}"><span class="rk">${cr[i]}</span><img class="clogo" src="logos/${esc(x.c.logo)}" alt=""><span class="who"><b>${esc(x.c.name)}</b><small>${x.n} ${x.n === 1 ? "Student Lead" : "Student Leads"} scoring${cr[i] === 1 ? ` · <em>Leading chapter</em>` : ""}</small></span><span class="pt">${x.pts}<small>pts</small></span></a></li>`).join("") : st.con.length ? "" : `<li class="empty">No points yet this month.</li>`;
     return `<div class="boards">
       <div class="board"><h3>${ic("trophy")} Student Leads</h3>${leadPod}<ol>${leadRows}</ol>
-        ${st.off.length ? `<p class="off"><b>Not on the board yet:</b> ${st.off.map(x => esc(x.l.name)).join(", ")}. Host an event to get started.</p>` : ""}</div>
+</div>
       <div class="board"><h3>${ic("flag")} Chapters</h3>${chapPod}${cr[0] === 1 && st.con.length && cr[1] !== 1 ? `<p class="leading">${ic("trophy")} Leading chapter: ${esc(st.con[0].c.name)}</p>` : ""}<ol>${chapRows}</ol>
-        ${st.coff.length ? `<p class="off"><b>Not on the board yet:</b> ${st.coff.map(x => esc(x.c.short)).join(", ")}.</p>` : ""}</div>
+</div>
     </div>`;
   }
+  const prof = id => `profile.html?id=${encodeURIComponent(id)}`;
+  const fmtDate = (d, y) => new Date(d + "T00:00:00").toLocaleDateString("en-IN", y ? { day: "numeric", month: "short", year: "numeric" } : { day: "numeric", month: "short" });
+  const isEvent = x => x.type === "virtual" || x.type === "inperson";
+  const eventRows = (list, withLead) => `<ul class="evlist">${list.map(x => { const l = L.find(y => y.id === x.lead); return `<li><span class="d">${fmtDate(x.date, true)}</span><span class="t"><b>${esc(x.title)}</b><small>${esc(x.club || "")}${x.type === "inperson" ? " · In person" : " · Virtual"}${withLead && l ? ` · <a href="${prof(l.id)}">${esc(l.name)}</a>` : ""}</small></span><span class="p">+${ptsOf(x)}</span></li>`; }).join("")}</ul>`;
   const leaderboardSection = () => {
     const recent = AC.filter(x => x.type === "virtual" || x.type === "inperson").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
     const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
@@ -212,7 +216,7 @@
           <li><b>${PTS.inperson}</b><span>Host an in-person event</span></li>
           <li><b>${PTS.whatsapp}</b><span>Active in WhatsApp club groups, every week</span></li>
           <li><b>+${PTS.streak}</b><span>Bonus for 4 weeks in a row with an event</span></li></ul></div>
-        <div class="recent"><h3>Latest events by Student Leads</h3><ul>${recent.map(x => { const l = L.find(y => y.id === x.lead); return `<li><span class="d">${fmt(x.date)}</span><span><b>${esc(x.title)}</b><small>${esc(x.club || "")}${l ? " · " + esc(l.name) : ""}</small></span></li>`; }).join("")}</ul></div>
+        <div class="recent"><h3>Latest events by Student Leads</h3><ul>${recent.map(x => { const l = L.find(y => y.id === x.lead); return `<li><span class="d">${fmt(x.date)}</span><span><b>${esc(x.title)}</b><small>${esc(x.club || "")}${l ? ` · <a href="${prof(l.id)}">${esc(l.name)}</a>` : ""}</small></span></li>`; }).join("")}</ul></div>
       </div>
     </div></section>`;
   };
@@ -410,16 +414,18 @@
           <a class="back" href="chapters.html">${ic("back")} All chapters</a>
           <div class="chero"><img src="logos/${esc(c.logo)}" alt="${esc(c.name)} logo">
             <div><span class="sticker y">EduMoon Chapter · EM-${c.cityCode}-${c.short}</span><h1>${esc(c.name)}</h1>
-              <div class="chips"><span class="chip">${esc(c.city)}</span><span class="chip">${ls.length} Student ${ls.length === 1 ? "Lead" : "Leads"}</span>${ci >= 0 ? `<a class="chip hot" href="index.html#leaderboard">${ic("trophy")} Rank ${cr[ci]} · ${st.con[ci].pts} points in ${esc(monthName)}</a>` : `<a class="chip" href="index.html#leaderboard">Not on the leaderboard yet</a>`}</div></div></div>
+              <div class="chips"><span class="chip">${esc(c.city)}</span><span class="chip">${ls.length} Student ${ls.length === 1 ? "Lead" : "Leads"}</span>${ci >= 0 ? `<a class="chip hot" href="index.html#leaderboard">${ic("trophy")} Rank ${cr[ci]} · ${st.con[ci].pts} points in ${esc(monthName)}</a>` : ""}</div></div></div>
         </div></section>
         <section style="padding-top:0"><div class="wrap">
           <div class="sec-head"><h2 style="font-size:clamp(30px,4vw,40px)">Student Leads</h2></div>
           <div class="leads">${ls.map(l => `<article class="lead-card">${avatar(l, 130)}
-            <span class="role">${esc(l.role)}</span><h3>${esc(l.name)}</h3>
+            <span class="role">${esc(l.role)}</span><h3><a href="${prof(l.id)}">${esc(l.name)}</a></h3>
             ${courseLine(l) ? `<p class="muted">${esc(courseLine(l))}</p>` : ""}
             ${lp(l.id) ? `<span class="lpts">${lp(l.id)} points in ${esc(monthName)}</span>` : ""}
             ${l.note ? `<span class="feat">${ic("trophy")} ${esc(l.note)}</span>` : ""}
-            <a class="idtag" href="verify.html?id=${encodeURIComponent(l.id)}" title="Verify this ID">${esc(l.id)}</a></article>`).join("")}</div>
+            <a class="idtag" href="verify.html?id=${encodeURIComponent(l.id)}" title="Verify this ID">${esc(l.id)}</a>
+            <a class="btn ghost small" href="${prof(l.id)}">View profile ${ic("arrow")}</a></article>`).join("")}</div>
+          ${(() => { const ev = AC.filter(x => isEvent(x) && ls.some(l => l.id === x.lead)).sort((a, b) => b.date.localeCompare(a.date)); return ev.length ? `<div class="sec-head" style="margin-top:50px"><h2 style="font-size:clamp(30px,4vw,40px)">Events by this chapter</h2></div>${eventRows(ev, true)}` : ""; })()}
           <div style="margin-top:50px">${applyBand()}</div>
         </div></section>`;
     }
@@ -481,6 +487,42 @@
         <p class="muted" style="margin-top:16px">Numbers start again from 001 every academic year. <a href="verify.html">Verify an ID</a></p>
         <div style="margin-top:44px">${applyBand()}</div>
       </div></section>`;
+  }
+
+  if (page === "profile") {
+    const id = (new URLSearchParams(location.search).get("id") || "").toUpperCase();
+    const l = L.find(x => x.id === id);
+    if (!l) {
+      main.innerHTML = `<section><div class="wrap"><a class="back" href="chapters.html">${ic("back")} All chapters</a><h1>Profile not found</h1><p class="muted" style="margin-top:10px">Check the link, or <a href="verify.html">verify an EduMoon ID</a>.</p></div></section>`;
+    } else {
+      const c = chapterOf(l.chapter);
+      document.title = `${l.name} · EduMoon Student Lead`;
+      const sm = standings(false), sa = standings(true), rm = rankList(sm.on, "pts"), ri = sm.on.findIndex(x => x.l.id === l.id);
+      const mine = AC.filter(x => x.lead === l.id);
+      const ev = mine.filter(isEvent).sort((a, b) => b.date.localeCompare(a.date));
+      const wa = mine.filter(x => x.type === "whatsapp");
+      const ptsM = ri >= 0 ? sm.on[ri].pts : 0, ptsA = (sa.on.find(x => x.l.id === l.id) || { pts: 0 }).pts;
+      const ord = n => n + (["th", "st", "nd", "rd"][(n % 100 - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
+      const tied = ri >= 0 && sm.on.filter((x, i) => rm[i] === rm[ri]).length > 1;
+      main.innerHTML = `<section><div class="wrap">
+          <a class="back" href="chapter.html?c=${c.id}">${ic("back")} ${esc(c.short)} chapter</a>
+          <div class="phero">${avatar(l, 150)}
+            <div><span class="sticker y">${ic("badge")} Verified ${esc(l.role)}</span>
+              <h1>${esc(l.name)}</h1>
+              <p class="pmeta"><a href="chapter.html?c=${c.id}">${esc(c.name)}</a>, ${esc(c.city)}${courseLine(l) ? `<br>${esc(courseLine(l))}` : ""}</p>
+              <div class="chips"><a class="idtag" href="verify.html?id=${encodeURIComponent(l.id)}">${esc(l.id)}</a>${l.note ? `<span class="feat">${ic("trophy")} ${esc(l.note)}</span>` : ""}</div></div></div>
+        </div></section>
+        ${ptsA ? `<section style="padding-top:0"><div class="wrap">
+          <div class="pstats">
+            <div><b>${ptsM}</b><span>Points in ${esc(monthName)}</span></div>
+            <div><b>${ptsA}</b><span>Points all time</span></div>
+            <div><b>${ri >= 0 ? (tied ? "Joint " : "") + ord(rm[ri]) : "–"}</b><span>Rank this month</span></div>
+          </div>
+          ${ev.length ? `<div class="sec-head" style="margin-top:44px"><h2 style="font-size:clamp(30px,4vw,40px)">Events</h2></div>${eventRows(ev, false)}` : ""}
+          ${wa.length ? `<p class="wa">${ic("chat")} Active in WhatsApp club groups for ${wa.length} ${wa.length === 1 ? "week" : "weeks"} · ${wa.reduce((s, x) => s + ptsOf(x), 0)} points</p>` : ""}
+          <p class="muted" style="margin-top:24px"><a href="index.html#leaderboard">See the full leaderboard</a></p>
+        </div></section>` : ""}`;
+    }
   }
 
   if (page === "verify") {

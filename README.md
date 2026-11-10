@@ -30,3 +30,8 @@ HTML, CSS and JavaScript. No frameworks. Hosted free on GitHub Pages.
 ---
 
 Built by Vikas Kapuganti for EduMoon
+
+## Events and photos
+- Event photos live in the `moments` folder.
+- To add an event to "Recent highlights", add a block to `EVENTS` in `assets/data.js`.
+- To add a photo to the "Moments" gallery, add a line to `MOMENTS` in `assets/data.js`.

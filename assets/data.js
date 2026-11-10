@@ -35,5 +35,34 @@ window.LEADS = [
   { id: "EM-VZG-ADG-002", chapter: "adg", name: "Pinnamaraju Hasini", course: "B.Sc Computer Science", year: "3rd year", role: "Student Lead", photo: "hasini.jpg" },
   { id: "EM-VZG-SJC-001", chapter: "sjc", name: "Reddi Maheswari", course: "B.Sc Computer Science", year: "3rd year", role: "Student Lead", photo: "maheswari.jpg" },
   { id: "EM-VZG-SVP-001", chapter: "svp", name: "G. Venkata Ramana Rao", course: "B.Tech CSE", year: "2nd year", role: "Student Lead", photo: "venkata-ramana-rao.jpg" },
-  { id: "EM-HYD-MRU-001", chapter: "mru", name: "Karam Karuna Sundar Dora", course: "B.Tech CSE (IoT)", year: "1st year", role: "Student Lead", photo: "sundar.jpg" }
+  { id: "EM-HYD-MRU-001", chapter: "mru", name: "Karam Karuna Sundar Dora", course: "B.Tech CSE (IoT)", year: "1st year", role: "Student Lead", photo: "sundar.jpg", note: "3rd place, EduMoon Innovation Challenge Season 2" }
+];
+
+// Recent highlights on the home page. Newest first. Photos go in the moments folder.
+// To add an event: copy one block, change the details, and add its photo to the moments folder.
+window.EVENTS = [
+  { title: "EduMoon Innovation Challenge", when: "Season 3 · Nov 2026", tag: "Innovation", photo: "innovation-s3.jpg",
+    text: "Students pitch their own ideas to solve real problems. Winners take home trophies and certificates. Season 2 had 50+ ideas and 15 finalists." },
+  { title: "Welcoming the first years at AUCEW", when: "Sep 2026", tag: "Orientation", photo: "aucew-orientation.jpg",
+    text: "Fun games, crazy energy and new friends for the first years at AU College of Engineering for Women." },
+  { title: "Community meet-up at RTIH", when: "Sep 2026", tag: "Meet-up", photo: "meetup-talk.jpg",
+    text: "Students from different colleges talked entrepreneurship, AI and community building, with Logos Circle Vizag and Aegion Community." },
+  { title: "3-day Robotics Workshop", when: "Sep 2026", tag: "Workshop", photo: "robotics-ahub.jpg",
+    text: "Hands-on robotics by DreamBot at A-Hub, with EduMoon as community partner. Learn, build and experiment beyond the classroom." },
+  { title: "Ganesh idol making", when: "Sep 2026", tag: "Community", photo: "ganesh-group.jpg",
+    text: "Our first community event of the year. Every clay idol was unique, and so was every memory made that evening." }
+];
+
+// Photo gallery ("Moments"). Add a line here for every new photo in the moments folder.
+window.MOMENTS = [
+  { photo: "innovation-s2.jpg", caption: "Innovation Challenge Season 2 winners" },
+  { photo: "ganesh-girls.jpg", caption: "Ganesh idol making" },
+  { photo: "meetup-group.jpg", caption: "Community meet-up with Logos Circle" },
+  { photo: "robotics-ahub.jpg", caption: "Robotics Workshop at A-Hub" },
+  { photo: "ganesh-duo.jpg", caption: "Clay idols, made by hand" },
+  { photo: "innovation-s3.jpg", caption: "Innovation Challenge Season 3" },
+  { photo: "ganesh-idol.jpg", caption: "Every idol was unique" },
+  { photo: "meetup-talk.jpg", caption: "Talks on AI and entrepreneurship" },
+  { photo: "aucew-orientation.jpg", caption: "AUCEW orientation games" },
+  { photo: "ganesh-group.jpg", caption: "Friends from the community" }
 ];

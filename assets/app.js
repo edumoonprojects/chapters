@@ -3,6 +3,7 @@
   const S = window.SITE, C = window.CHAPTERS, L = window.LEADS;
   const EV = window.EVENTS || [], MO = window.MOMENTS || [], ME = window.MEMBERS || [], CL = window.CLUBS || [];
   const UP = window.UPCOMING || [], FA = window.FAME || [], PR = window.PRESS || [], MC = window.MORE_COLLEGES || [], PA = window.PARTNERS || [], FQ = window.FAQ || [];
+  const PTS = window.POINTS || {}, LBC = window.LEADERBOARD || {}, AC = window.ACTIVITY || [];
   const page = document.body.dataset.page;
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -51,7 +52,7 @@
 
   // ---------- Header and footer ----------
   const navItems = [
-    ["index.html", "Home", "home"], ["chapters.html", "Chapters", "chapters"], ["clubs.html", "Clubs", "clubs"], ["index.html#highlights", "Events", "events"],
+    ["index.html", "Home", "home"], ["chapters.html", "Chapters", "chapters"], ["clubs.html", "Clubs", "clubs"], ["index.html#leaderboard", "Leaderboard", "leaderboard"],
     [S.gamesUrl, "Games", "games"], ["verify.html", "Verify ID", "verify"], ["lead.html", "Become a Lead", "lead"]
   ];
   $("#top").innerHTML = `<div class="wrap">
@@ -109,7 +110,7 @@
     ["book", "Learn by doing", "Real experience in leadership, events and communication, not just theory."],
     ["id", "Your official EduMoon ID", "A verified ID and profile on this site to show on your resume and LinkedIn."],
     ["award", "Certificates", "A certificate for every event you organise."],
-    ["gift", "Goodies and rewards", "Rewards for top performers on the weekly leaderboard."],
+    ["gift", "Goodies and rewards", "Climb the leaderboard and get rewarded as a top performer."],
     ["zap", "First access", "EduMoon opportunities, workshops and events before everyone else."],
     ["linkedin", "LinkedIn recommendations", "Strong performers can earn a recommendation from the EduMoon founder."],
     ["paper", "Featured in EduMoon Magazine", "Top Student Leads and their events get featured in our monthly magazine."]
@@ -162,6 +163,64 @@
       if (page === "verify") history.replaceState(null, "", q ? "?id=" + encodeURIComponent(q) : location.pathname);
     });
     if ($("#verifyInput").value) run();
+  }
+  // ---------- Leaderboard ----------
+  const ptsOf = x => x.points != null ? x.points : (PTS[x.type] || 0);
+  const inMonth = x => !LBC.month || String(x.date).startsWith(LBC.month);
+  const monthName = (() => { if (!LBC.month) return "This month"; const [y, m] = LBC.month.split("-"); return new Date(+y, +m - 1, 1).toLocaleDateString("en-IN", { month: "long", year: "numeric" }); })();
+  const rankList = (items, key) => { const r = []; items.forEach((it, i) => r.push(i && it[key] === items[i - 1][key] ? r[i - 1] : i + 1)); return r; };
+  function standings(all) {
+    const acts = AC.filter(x => all || inMonth(x));
+    const leads = L.map(l => ({ l, pts: acts.filter(x => x.lead === l.id).reduce((s, x) => s + ptsOf(x), 0), events: acts.filter(x => x.lead === l.id && (x.type === "virtual" || x.type === "inperson")).length }));
+    const on = leads.filter(x => x.pts > 0).sort((a, b) => b.pts - a.pts || b.events - a.events || a.l.name.localeCompare(b.l.name));
+    const chaps = C.map(c => { const ls = leads.filter(x => x.l.chapter === c.id); return { c, pts: ls.reduce((s, x) => s + x.pts, 0), n: ls.filter(x => x.pts > 0).length }; });
+    const con = chaps.filter(x => x.pts > 0).sort((a, b) => b.pts - a.pts || a.c.name.localeCompare(b.c.name));
+    return { on, off: leads.filter(x => x.pts === 0), con, coff: chaps.filter(x => x.pts === 0) };
+  }
+  const medal = r => r <= 3 ? ` m${r}` : "";
+  function boardHTML(all) {
+    const st = standings(all), lr = rankList(st.on, "pts"), cr = rankList(st.con, "pts");
+    const podium = (items, ranks, face, label, sub) => {
+      if (!items.length) return "";
+      const order = [1, 0, 2].filter(i => i < items.length);
+      return `<div class="podium">${order.map(i => `<div class="pod p${Math.min(ranks[i], 4)}">
+        <div class="pface">${face(items[i])}</div><b class="pname">${label(items[i])}</b><span class="psub">${sub(items[i])}</span>
+        <div class="block"><span class="pnum">${ranks[i]}</span><span class="ppts">${items[i].pts} pts</span></div></div>`).join("")}</div>`;
+    };
+    const short = n => esc(n);
+    const leadPod = podium(st.on, lr, x => avatar(x.l, 68), x => short(x.l.name), x => esc((chapterOf(x.l.chapter) || {}).short || ""));
+    const chapPod = podium(st.con, cr, x => `<img class="clogo big" src="logos/${esc(x.c.logo)}" alt="">`, x => esc(x.c.short), x => esc(x.c.city));
+    const leadRows = st.on.length > 3 ? st.on.map((x, i) => { if (i < 3) return ""; const c = chapterOf(x.l.chapter); return `<li class="row${medal(lr[i])}"><span class="rk">${lr[i]}</span>${avatar(x.l, 44)}<span class="who"><b>${esc(x.l.name)}</b><small>${esc(c ? c.short : "")} · ${x.events ? `${x.events} ${x.events === 1 ? "event" : "events"}` : "WhatsApp active"}</small></span><span class="pt">${x.pts}<small>pts</small></span></li>`; }).join("") : st.on.length ? "" : `<li class="empty">No points yet this month.</li>`;
+    const chapRows = st.con.length > 3 ? st.con.map((x, i) => i < 3 ? "" : `<li class="row${medal(cr[i])}"><span class="rk">${cr[i]}</span><img class="clogo" src="logos/${esc(x.c.logo)}" alt=""><span class="who"><b>${esc(x.c.name)}</b><small>${x.n} ${x.n === 1 ? "Student Lead" : "Student Leads"} scoring${cr[i] === 1 ? ` · <em>Leading chapter</em>` : ""}</small></span><span class="pt">${x.pts}<small>pts</small></span></li>`).join("") : st.con.length ? "" : `<li class="empty">No points yet this month.</li>`;
+    return `<div class="boards">
+      <div class="board"><h3>${ic("trophy")} Student Leads</h3>${leadPod}<ol>${leadRows}</ol>
+        ${st.off.length ? `<p class="off"><b>Not on the board yet:</b> ${st.off.map(x => esc(x.l.name)).join(", ")}. Host an event to get started.</p>` : ""}</div>
+      <div class="board"><h3>${ic("flag")} Chapters</h3>${chapPod}${cr[0] === 1 && st.con.length && cr[1] !== 1 ? `<p class="leading">${ic("trophy")} Leading chapter: ${esc(st.con[0].c.name)}</p>` : ""}<ol>${chapRows}</ol>
+        ${st.coff.length ? `<p class="off"><b>Not on the board yet:</b> ${st.coff.map(x => esc(x.c.short)).join(", ")}.</p>` : ""}</div>
+    </div>`;
+  }
+  const leaderboardSection = () => {
+    const recent = AC.filter(x => x.type === "virtual" || x.type === "inperson").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
+    const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    return `<section id="leaderboard" class="tint"><div class="wrap">
+      <div class="sec-head"><span class="sticker y">${ic("trophy")} Leaderboard</span><h2>Who’s leading ${esc(monthName)}</h2><p>Updated every week. Last updated ${esc(LBC.updated || "")}. Points start fresh every month.</p></div>
+      <div class="lb-tabs" role="tablist"><button type="button" role="tab" aria-selected="true" data-all="0">${esc(monthName)}</button><button type="button" role="tab" aria-selected="false" data-all="1">All time</button></div>
+      <div id="lbBody">${boardHTML(false)}</div>
+      <div class="lb-foot">
+        <div class="earn"><h3>How to earn points</h3><ul>
+          <li><b>${PTS.virtual}</b><span>Host a virtual event</span></li>
+          <li><b>${PTS.inperson}</b><span>Host an in-person event</span></li>
+          <li><b>${PTS.whatsapp}</b><span>Active in WhatsApp club groups, every week</span></li>
+          <li><b>+${PTS.streak}</b><span>Bonus for 4 weeks in a row with an event</span></li></ul></div>
+        <div class="recent"><h3>Latest events by Student Leads</h3><ul>${recent.map(x => { const l = L.find(y => y.id === x.lead); return `<li><span class="d">${fmt(x.date)}</span><span><b>${esc(x.title)}</b><small>${esc(x.club || "")}${l ? " · " + esc(l.name) : ""}</small></span></li>`; }).join("")}</ul></div>
+      </div>
+    </div></section>`;
+  };
+  function wireBoard() {
+    document.querySelectorAll(".lb-tabs button").forEach(b => b.addEventListener("click", () => {
+      document.querySelectorAll(".lb-tabs button").forEach(x => x.setAttribute("aria-selected", x === b));
+      $("#lbBody").innerHTML = boardHTML(b.dataset.all === "1");
+    }));
   }
   const brand = (f, n) => `<span class="blogo"><img src="brands/${f}" alt="${n}" loading="lazy"></span>`;
   const clubTiles = () => `<div class="clubs">${CL.map(c => `<a class="club" href="clubs.html#${c.code.toLowerCase()}">${ic(c.icon)}<h3>${esc(c.name)}</h3><p>${esc(c.focus)}</p><span class="seats">${c.seats} seats per chapter</span></a>`).join("")}</div>`;
@@ -245,7 +304,9 @@
         <div class="more"><p>This is just a glimpse. See everything we do on Instagram.</p><a class="btn" href="${S.instagramUrl}" target="_blank" rel="noopener">Follow @edumoon_global ${ic("arrow")}</a></div>
       </div></section>
 
-      <section class="tint"><div class="wrap">
+      ${leaderboardSection()}
+
+      <section><div class="wrap">
         <div class="sec-head center"><span class="sticker t">Moments</span><h2>Real students. Real memories.</h2></div>
         <div class="moments">${MO.map((m, i) => `<button class="moment" type="button" data-i="${i}"><img src="moments/${esc(m.photo)}" alt="${esc(m.caption)}" loading="lazy"><span>${esc(m.caption)}</span></button>`).join("")}</div>
       </div></section>
@@ -319,6 +380,7 @@
       </div></section>
       <dialog class="lightbox" id="lb"><button class="close" type="button" aria-label="Close">${ic("x")}</button><img id="lbImg" alt=""><p id="lbCap"></p></dialog>`;
     wireVerify();
+    wireBoard();
 
     const lb = $("#lb");
     document.querySelectorAll(".moment").forEach(b => b.addEventListener("click", () => {
@@ -342,17 +404,20 @@
     } else {
       document.title = `${c.name} · EduMoon Chapters`;
       const ls = leadsOf(c.id);
+      const st = standings(false), cr = rankList(st.con, "pts"), ci = st.con.findIndex(x => x.c.id === c.id);
+      const lp = id => (st.on.find(x => x.l.id === id) || { pts: 0 }).pts;
       main.innerHTML = `<section><div class="wrap">
           <a class="back" href="chapters.html">${ic("back")} All chapters</a>
           <div class="chero"><img src="logos/${esc(c.logo)}" alt="${esc(c.name)} logo">
             <div><span class="sticker y">EduMoon Chapter · EM-${c.cityCode}-${c.short}</span><h1>${esc(c.name)}</h1>
-              <div class="chips"><span class="chip">${esc(c.city)}</span><span class="chip">${ls.length} Student ${ls.length === 1 ? "Lead" : "Leads"}</span></div></div></div>
+              <div class="chips"><span class="chip">${esc(c.city)}</span><span class="chip">${ls.length} Student ${ls.length === 1 ? "Lead" : "Leads"}</span>${ci >= 0 ? `<a class="chip hot" href="index.html#leaderboard">${ic("trophy")} Rank ${cr[ci]} · ${st.con[ci].pts} points in ${esc(monthName)}</a>` : `<a class="chip" href="index.html#leaderboard">Not on the leaderboard yet</a>`}</div></div></div>
         </div></section>
         <section style="padding-top:0"><div class="wrap">
           <div class="sec-head"><h2 style="font-size:clamp(30px,4vw,40px)">Student Leads</h2></div>
           <div class="leads">${ls.map(l => `<article class="lead-card">${avatar(l, 130)}
             <span class="role">${esc(l.role)}</span><h3>${esc(l.name)}</h3>
             ${courseLine(l) ? `<p class="muted">${esc(courseLine(l))}</p>` : ""}
+            ${lp(l.id) ? `<span class="lpts">${lp(l.id)} points in ${esc(monthName)}</span>` : ""}
             ${l.note ? `<span class="feat">${ic("trophy")} ${esc(l.note)}</span>` : ""}
             <a class="idtag" href="verify.html?id=${encodeURIComponent(l.id)}" title="Verify this ID">${esc(l.id)}</a></article>`).join("")}</div>
           <div style="margin-top:50px">${applyBand()}</div>

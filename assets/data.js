@@ -43,6 +43,22 @@ window.LEADS = [
   { id: "EM-26-HYD-MRU-001", chapter: "mru", name: "Karam Karuna Sundar Dora", course: "B.Tech CSE (IoT)", year: "1st year", role: "Student Lead", photo: "sundar.jpg", note: "3rd place, EduMoon Innovation Challenge Season 2" }
 ];
 
+// ---------- Leaderboard ----------
+// Points for each activity type. A line in ACTIVITY can also set its own "points".
+window.POINTS = { virtual: 25, inperson: 40, whatsapp: 10, streak: 20 };
+window.LEADERBOARD = { month: "2026-11", updated: "11 Nov 2026" }; // change "month" when a new month starts
+// One line per activity. lead = the Student Lead's ID. type = virtual, inperson, whatsapp or streak.
+window.ACTIVITY = [
+  { lead: "EM-26-HYD-MRU-001", date: "2026-11-02", type: "virtual", club: "Entrepreneurship", title: "Turning Ideas into Opportunities" },
+  { lead: "EM-26-VZG-ADG-002", date: "2026-11-05", type: "virtual", club: "English", title: "Movie Story Time: Baahubali" },
+  { lead: "EM-26-VZG-AUCE-002", date: "2026-11-07", type: "virtual", club: "Coding", title: "AI Agents and Automation" },
+  { lead: "EM-26-VZG-AUCE-001", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" },
+  { lead: "EM-26-VZG-AUCE-002", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" },
+  { lead: "EM-26-VZG-AUCE-003", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" },
+  { lead: "EM-26-VZG-ADG-002", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" },
+  { lead: "EM-26-HYD-MRU-001", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" }
+];
+
 // Club members (anyone with an EduMoon member number). Name and club are shown on the Verify page.
 // Example: { id: "EM-26-VZG-AUCE-CD-001", name: "Student Name" },
 window.MEMBERS = [
@@ -108,6 +124,7 @@ window.FAQ = [
   ["How do I get a seat in a chapter club?", "Recruitment for chapter clubs is opening soon. Join the community to hear first."],
   ["Do I need to know coding?", "No. Most of our members start from zero. The Coding Club is built for beginners."],
   ["My college isn’t listed. Can I start a chapter?", "Yes. Apply to become a Student Lead and bring EduMoon to your college."],
+  ["How do Student Leads earn points?", "25 points for a virtual event, 40 for an in-person event, 10 a week for being active in the WhatsApp club groups, and a 20-point bonus for 4 weeks in a row with an event. The leaderboard is updated every week and starts fresh every month."],
   ["What is an EduMoon ID?", "Every Student Lead and club member gets a unique number, like EM-26-VZG-AUCE-001. Anyone can check it on the Verify page."]
 ];
 

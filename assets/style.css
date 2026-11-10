@@ -427,3 +427,67 @@ a.club:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--ink)
 .idbreak div:nth-child(2) { background: var(--yellow); } .idbreak div:nth-child(5) { background: var(--pink); color: #fff; }
 .idbreak b { display: block; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 26px; }
 .idbreak span { font-size: 13px; font-weight: 800; }
+
+/* Leaderboard */
+.sticker .ic { width: 15px; height: 15px; }
+.lb-tabs { display: inline-flex; gap: 6px; background: var(--white); border: var(--edge); border-radius: 99px; padding: 5px; margin-bottom: 22px; }
+.lb-tabs button { font: inherit; font-weight: 800; font-size: 15px; border: 0; background: transparent; padding: 9px 18px; border-radius: 99px; cursor: pointer; color: var(--ink); min-height: 42px; }
+.lb-tabs button[aria-selected="true"] { background: var(--ink); color: #fff; }
+.boards { display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; align-items: start; }
+.board { background: var(--white); border: var(--edge); border-radius: var(--r); padding: 20px; box-shadow: var(--pop); }
+.board h3 { font-size: 24px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.board h3 .ic { width: 24px; height: 24px; color: var(--pink); }
+.board ol { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.board .row { display: flex; align-items: center; gap: 12px; border: 2px solid var(--ink); border-radius: 16px; padding: 10px 14px 10px 10px; background: var(--paper); }
+.board .row.m1 { background: #FFE58A; } .board .row.m2 { background: #E4E2F3; } .board .row.m3 { background: #FFD3B0; }
+.rk { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--ink); background: var(--white); display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 17px; flex: none; }
+.row.m1 .rk { background: var(--yellow); }
+.board .row .av { border: 2px solid var(--ink); }
+.clogo { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--ink); background: #fff; flex: none; }
+.board .who { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.board .who b { font-size: 16px; }
+.board .who small { font-size: 13px; color: var(--soft); font-weight: 700; }
+.board .who em { font-style: normal; color: var(--pink); font-weight: 800; }
+.pt { font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1; text-align: right; flex: none; }
+.pt small { display: block; font-family: var(--body); font-size: 11px; font-weight: 800; color: var(--soft); text-transform: uppercase; letter-spacing: .08em; }
+.board .empty { color: var(--soft); font-weight: 700; padding: 10px; }
+.off { margin-top: 14px; font-size: 14px; color: var(--soft); }
+.off b { color: var(--ink); }
+.lb-foot { display: grid; grid-template-columns: 1fr 1.15fr; gap: 22px; margin-top: 22px; }
+.earn, .recent { background: var(--white); border: var(--edge); border-radius: var(--r); padding: 20px; }
+.earn { background: var(--purple); color: #fff; }
+.earn h3, .recent h3 { font-size: 22px; margin-bottom: 12px; }
+.earn ul, .recent ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.earn li { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+.earn li b { font-family: var(--display); font-size: 20px; background: var(--yellow); color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; min-width: 56px; text-align: center; padding: 4px 6px; flex: none; }
+.recent li { display: flex; gap: 12px; align-items: flex-start; }
+.recent .d { flex: none; font-weight: 800; font-size: 13px; background: var(--paper2); border: 2px solid var(--ink); border-radius: 10px; padding: 4px 8px; min-width: 64px; text-align: center; }
+.recent li span:last-child { display: flex; flex-direction: column; line-height: 1.3; }
+.recent small { color: var(--soft); font-weight: 700; font-size: 13px; }
+@media (max-width: 880px) { .boards, .lb-foot { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .board { padding: 14px; } .board .row { gap: 9px; padding: 8px 10px 8px 8px; } .pt { font-size: 22px; } .board .row .av { width: 38px !important; height: 38px !important; } .clogo { width: 38px; height: 38px; } }
+.chip.hot { background: var(--yellow); display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.chip .ic { width: 16px; height: 16px; }
+a.chip { text-decoration: none; }
+.lpts { font-size: 14px; font-weight: 800; color: var(--purple); }
+.board .who { align-items: flex-start; text-align: left; gap: 0; font-size: inherit; }
+
+/* Podium */
+.podium { display: flex; align-items: flex-end; justify-content: center; gap: 10px; margin: 6px 0 16px; padding-top: 6px; }
+.pod { flex: 1; max-width: 180px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; min-width: 0; }
+.pface .av { border: 3px solid var(--ink); }
+.clogo.big { width: 68px; height: 68px; border-radius: 16px; border-width: 2.5px; }
+.pname { font-family: var(--display); font-size: 17px; line-height: 1.15; margin-top: 8px; overflow-wrap: anywhere; }
+.psub { font-size: 12px; font-weight: 800; color: var(--soft); text-transform: uppercase; letter-spacing: .06em; }
+.block { width: 100%; margin-top: 8px; border: var(--edge); border-bottom: 0; border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; gap: 2px; }
+.pnum { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1; }
+.ppts { font-weight: 800; font-size: 13px; background: var(--white); border: 2px solid var(--ink); border-radius: 99px; padding: 2px 9px; }
+.p1 .block { height: 140px; background: var(--yellow); }
+.p2 .block { height: 110px; background: #C9C6F0; }
+.p3 .block { height: 88px; background: #F4B98A; }
+.p4 .block { height: 70px; background: var(--paper2); }
+.podium + ol, .podium + .leading { border-top: var(--edge); padding-top: 14px; }
+.podium + ol:empty { display: none; }
+.leading { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; color: var(--pink); margin-bottom: 4px; }
+.leading .ic { width: 18px; height: 18px; }
+@media (max-width: 420px) { .pnum { font-size: 32px; } .p1 .block { height: 116px; } .p2 .block { height: 92px; } .p3 .block { height: 74px; } .pname { font-size: 15px; } .podium { gap: 6px; } }

@@ -9,7 +9,7 @@
 window.SITE = {
   students: "20,000+",
   colleges: "20+",
-  games: 67,
+  games: 76,
   gamesUrl: "https://edumoonprojects.github.io/event/",
   applyUrl: "https://forms.gle/UU6AkKJrDk4mejYc8",
   communityUrl: "https://chat.whatsapp.com/EqrtHVWwh3OI2aFhg6Zz6s",
@@ -27,19 +27,21 @@ window.CHAPTERS = [
   { id: "adg", name: "Aditya Degree College, Gajuwaka Women’s Campus", short: "ADG", city: "Visakhapatnam", cityCode: "VZG", logo: "aditya.png" },
   { id: "sjc", name: "St. Joseph’s College for Women (A)", short: "SJC", city: "Visakhapatnam", cityCode: "VZG", logo: "st-josephs.png" },
   { id: "svp", name: "Sanketika Vidya Parishad Engineering College", short: "SVP", city: "Visakhapatnam", cityCode: "VZG", logo: "sanketika.png" },
+  { id: "gvpw", name: "Gayatri Vidya Parishad College of Engineering for Women", short: "GVPW", city: "Visakhapatnam", cityCode: "VZG", logo: "gvpw.png" },
   { id: "mru", name: "Malla Reddy University x NIAT", short: "MRU", city: "Hyderabad", cityCode: "HYD", logo: "malla-reddy.png" }
 ];
 
 window.LEADS = [
   { id: "EM-26-VZG-AUCE-001", chapter: "auce", name: "Pothula Harshita", course: "B.Tech CSE", year: "3rd year", role: "Student Lead", photo: "pothula-harshita.jpg" },
   { id: "EM-26-VZG-AUCE-002", chapter: "auce", name: "Raga Harshitha Nemalapuri", course: "B.Tech CSE", year: "3rd year", role: "Student Lead", photo: "raga-harshitha.jpg" },
-  { id: "EM-26-VZG-AUCE-003", chapter: "auce", name: "Sultana", course: "", year: "", role: "Student Lead", photo: "" },
-  { id: "EM-26-VZG-AUW-001", chapter: "auw", name: "Spandana Goppa", course: "", year: "", role: "Student Lead", photo: "" },
-  { id: "EM-26-VZG-AUW-002", chapter: "auw", name: "Chetana", course: "", year: "", role: "Student Lead", photo: "" },
+  { id: "EM-26-VZG-AUCE-003", chapter: "auce", name: "Sadia Sultana", course: "B.Tech CSE", year: "2nd year", role: "Student Lead", photo: "sadia-sultana.jpg" },
+  { id: "EM-26-VZG-AUW-001", chapter: "auw", name: "Spandana Goppa", course: "ECE", year: "2nd year", role: "Student Lead", photo: "spandana-goppa.jpg" },
+  { id: "EM-26-VZG-AUW-002", chapter: "auw", name: "Chetana", course: "IT", year: "3rd year", role: "Student Lead", photo: "chetana.jpg" },
   { id: "EM-26-VZG-ADG-001", chapter: "adg", name: "Bade Srivalli", course: "B.Sc Computer Science", year: "3rd year", role: "Student Lead", photo: "srivalli.jpg" },
   { id: "EM-26-VZG-ADG-002", chapter: "adg", name: "Pinnamaraju Hasini", course: "B.Sc Computer Science", year: "3rd year", role: "Student Lead", photo: "hasini.jpg" },
   { id: "EM-26-VZG-SJC-001", chapter: "sjc", name: "Reddi Maheswari", course: "B.Sc Computer Science", year: "3rd year", role: "Student Lead", photo: "maheswari.jpg" },
   { id: "EM-26-VZG-SVP-001", chapter: "svp", name: "G. Venkata Ramana Rao", course: "B.Tech CSE", year: "2nd year", role: "Student Lead", photo: "venkata-ramana-rao.jpg" },
+  { id: "EM-26-VZG-GVPW-001", chapter: "gvpw", name: "Sofiya Zeba", course: "B.Tech CSE", year: "2nd year", role: "Student Lead", photo: "sofiya-zeba.jpg" },
   { id: "EM-26-HYD-MRU-001", chapter: "mru", name: "Karam Karuna Sundar Dora", course: "B.Tech CSE (IoT)", year: "1st year", role: "Student Lead", photo: "sundar.jpg", note: "3rd place, EduMoon Innovation Challenge Season 2" }
 ];
 
@@ -47,8 +49,11 @@ window.LEADS = [
 // Points for each activity type. A line in ACTIVITY can also set its own "points".
 window.POINTS = { virtual: 25, inperson: 40, whatsapp: 10, streak: 20 };
 window.LEADERBOARD = { month: "2026-11", updated: "11 Nov 2026" }; // change "month" when a new month starts
+// Date: "2026-11-05", or just "2026-10" if only the month is known.
 // One line per activity. lead = the Student Lead's ID. type = virtual, inperson, whatsapp or streak.
 window.ACTIVITY = [
+  { lead: "EM-26-VZG-AUW-001", date: "2026-10", type: "inperson", title: "EduMoon Orientation, AU College for Women" },
+  { lead: "EM-26-VZG-AUW-002", date: "2026-10", type: "inperson", title: "EduMoon Orientation, AU College for Women" },
   { lead: "EM-26-HYD-MRU-001", date: "2026-11-02", type: "virtual", club: "Entrepreneurship", title: "Turning Ideas into Opportunities" },
   { lead: "EM-26-VZG-ADG-002", date: "2026-11-05", type: "virtual", club: "English", title: "Movie Story Time: Baahubali" },
   { lead: "EM-26-VZG-AUCE-002", date: "2026-11-07", type: "virtual", club: "Coding", title: "AI Agents and Automation" },
@@ -56,6 +61,7 @@ window.ACTIVITY = [
   { lead: "EM-26-VZG-AUCE-002", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" },
   { lead: "EM-26-VZG-AUCE-003", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" },
   { lead: "EM-26-VZG-ADG-002", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" },
+  { lead: "EM-26-VZG-GVPW-001", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" },
   { lead: "EM-26-HYD-MRU-001", date: "2026-11-10", type: "whatsapp", title: "Active in WhatsApp club groups" }
 ];
 

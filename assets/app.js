@@ -200,12 +200,16 @@
     </div>`;
   }
   const prof = id => `profile.html?id=${encodeURIComponent(id)}`;
-  const fmtDate = (d, y) => new Date(d + "T00:00:00").toLocaleDateString("en-IN", y ? { day: "numeric", month: "short", year: "numeric" } : { day: "numeric", month: "short" });
+  const fmtDate = (d, y) => String(d).length === 7 ? new Date(d + "-01T00:00:00").toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : new Date(d + "T00:00:00").toLocaleDateString("en-IN", y ? { day: "numeric", month: "short", year: "numeric" } : { day: "numeric", month: "short" });
+  // Events run by more than one Student Lead share the same date and title: show them once, with every lead's name.
+  const groupEvents = list => { const out = []; list.forEach(x => { const g = out.find(y => y.date === x.date && y.title === x.title); if (g) g.leads.push(x.lead); else out.push(Object.assign({}, x, { leads: [x.lead] })); }); return out; };
+  const leadLinks = ids => ids.map(id => L.find(y => y.id === id)).filter(Boolean).map(l => `<a href="${prof(l.id)}">${esc(l.name)}</a>`).join(" and ");
+  const subLine = (...parts) => parts.filter(Boolean).join(" · ");
   const isEvent = x => x.type === "virtual" || x.type === "inperson";
-  const eventRows = (list, withLead) => `<ul class="evlist">${list.map(x => { const l = L.find(y => y.id === x.lead); return `<li><span class="d">${fmtDate(x.date, true)}</span><span class="t"><b>${esc(x.title)}</b><small>${esc(x.club || "")}${x.type === "inperson" ? " · In person" : " · Virtual"}${withLead && l ? ` · <a href="${prof(l.id)}">${esc(l.name)}</a>` : ""}</small></span><span class="p">+${ptsOf(x)}</span></li>`; }).join("")}</ul>`;
+  const eventRows = (list, withLead, self) => `<ul class="evlist">${groupEvents(list).map(x => { const others = x.leads.filter(id => id !== self); const all = self ? AC.filter(y => y.date === x.date && y.title === x.title && y.lead !== self).map(y => y.lead) : []; return `<li><span class="d">${fmtDate(x.date, true)}</span><span class="t"><b>${esc(x.title)}</b><small>${subLine(esc(x.club || ""), x.type === "inperson" ? "In person" : "Virtual", withLead ? leadLinks(others) : "", all.length ? "with " + leadLinks(all) : "")}</small></span><span class="p">+${ptsOf(x)}${x.leads.length > 1 ? "<small> each</small>" : ""}</span></li>`; }).join("")}</ul>`;
   const leaderboardSection = () => {
-    const recent = AC.filter(x => x.type === "virtual" || x.type === "inperson").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
-    const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    const recent = groupEvents(AC.filter(isEvent).sort((a, b) => b.date.localeCompare(a.date))).slice(0, 6);
+    const fmt = d => fmtDate(d, false);
     return `<section id="leaderboard" class="tint"><div class="wrap">
       <div class="sec-head"><span class="sticker y">${ic("trophy")} Leaderboard</span><h2>Who’s leading ${esc(monthName)}</h2><p>Updated every week. Last updated ${esc(LBC.updated || "")}. Points start fresh every month.</p></div>
       <div class="lb-tabs" role="tablist"><button type="button" role="tab" aria-selected="true" data-all="0">${esc(monthName)}</button><button type="button" role="tab" aria-selected="false" data-all="1">All time</button></div>
@@ -216,7 +220,7 @@
           <li><b>${PTS.inperson}</b><span>Host an in-person event</span></li>
           <li><b>${PTS.whatsapp}</b><span>Active in WhatsApp club groups, every week</span></li>
           <li><b>+${PTS.streak}</b><span>Bonus for 4 weeks in a row with an event</span></li></ul></div>
-        <div class="recent"><h3>Latest events by Student Leads</h3><ul>${recent.map(x => { const l = L.find(y => y.id === x.lead); return `<li><span class="d">${fmt(x.date)}</span><span><b>${esc(x.title)}</b><small>${esc(x.club || "")}${l ? ` · <a href="${prof(l.id)}">${esc(l.name)}</a>` : ""}</small></span></li>`; }).join("")}</ul></div>
+        <div class="recent"><h3>Latest events by Student Leads</h3><ul>${recent.map(x => { return `<li><span class="d">${fmt(x.date)}</span><span><b>${esc(x.title)}</b><small>${subLine(esc(x.club || ""), leadLinks(x.leads))}</small></span></li>`; }).join("")}</ul></div>
       </div>
     </div></section>`;
   };
@@ -518,7 +522,7 @@
             <div><b>${ptsA}</b><span>Points all time</span></div>
             <div><b>${ri >= 0 ? (tied ? "Joint " : "") + ord(rm[ri]) : "–"}</b><span>Rank this month</span></div>
           </div>
-          ${ev.length ? `<div class="sec-head" style="margin-top:44px"><h2 style="font-size:clamp(30px,4vw,40px)">Events</h2></div>${eventRows(ev, false)}` : ""}
+          ${ev.length ? `<div class="sec-head" style="margin-top:44px"><h2 style="font-size:clamp(30px,4vw,40px)">Events</h2></div>${eventRows(ev, false, l.id)}` : ""}
           ${wa.length ? `<p class="wa">${ic("chat")} Active in WhatsApp club groups for ${wa.length} ${wa.length === 1 ? "week" : "weeks"} · ${wa.reduce((s, x) => s + ptsOf(x), 0)} points</p>` : ""}
           <p class="muted" style="margin-top:24px"><a href="index.html#leaderboard">See the full leaderboard</a></p>
         </div></section>` : ""}`;
